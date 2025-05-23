@@ -2,6 +2,12 @@
 import os
 import train
 import preprocess
+# 设置 GPU 内存增长
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
+# 设置使用的 GPU
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # 使用第一个 GPU，如果有多个 GPU 可以改为 "0,1,2,3"
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 home = os.getcwd()
 record_dir = os.path.join(home, 'record')
@@ -21,12 +27,12 @@ test_meta = os.path.join(record_dir, 'test.meta')
 status_label = os.path.join(data_dir, 'status.label')
 
 flags = tf.flags
+FLAGS = flags.FLAGS
 
 flags.DEFINE_string('train_json', train_record, 'the processed train json file')
 flags.DEFINE_string('test_json', test_record, 'the processed test json file')
 flags.DEFINE_string('train_meta', train_meta, 'the processed train number')
 flags.DEFINE_string('test_meta', test_meta, 'the processed test number')
-flags.DEFINE_string('log_dir', log_dir, 'where to save the log')
 flags.DEFINE_string('model_dir', log_dir, 'where to save the model')
 flags.DEFINE_string('data_dir', data_dir, 'where to read data')
 flags.DEFINE_integer('class_num', 18, 'the class number')
@@ -60,12 +66,14 @@ flags.DEFINE_integer("loss_save", 100, "step of saving loss")
 flags.DEFINE_integer("checkpoint", 5000, "checkpoint to save and evaluate the model")
 flags.DEFINE_float("grad_clip", 5.0, "Global Norm gradient clipping rate")
 
-flags.DEFINE_boolean('is_cudnn', True, 'whether take the cudnn gru')
+flags.DEFINE_boolean('is_cudnn', False, 'whether take the cudnn gru')
 flags.DEFINE_float('rec_loss', 0.5, 'the parameter to control the reconstruction of length sequence')
 
 
 def main(_):
     config = flags.FLAGS
+    config.log_dir = log_dir
+    
     if config.length_num == 'auto':
         config.length_num = config.max_packet_length // config.length_block + 4
     else:

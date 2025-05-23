@@ -1,0 +1,85 @@
+# FS-Net 运行说明
+
+## 1. 数据集准备
+将数据集放入 datasets 目录下，目录结构如下：
+```
+datasets/
+├── 数据集1/
+│   ├── 类别1/
+│   │   ├── xxx.pcap
+│   │   └── ...
+│   ├── 类别2/
+│   └── ...
+├── 数据集2/
+└── ...
+```
+
+## 2. 数据预处理
+运行数据预处理脚本：
+```bash
+python process_datasets.py
+```
+
+如果只想处理特定数据集，可以使用 --dataset 参数：
+```bash
+python process_datasets.py --dataset ISCXVPN-Service
+```
+
+处理后的数据将存储在 processed_datasets 目录下：
+```
+processed_datasets/
+├── 数据集名称/
+│   ├── filter/          # 存储标签文件
+│   │   └── status.label
+│   ├── origin_data/    # 存储数值格式文件
+│   └── record/         # 存储JSON格式文件和元信息
+│       ├── train.json
+│       ├── test.json
+│       ├── train.meta
+│       └── test.meta
+```
+
+## 3. 模型训练
+训练所有数据集：
+```bash
+python train_all.py
+```
+
+训练特定数据集：
+```bash
+python train_all.py --dataset ISCXVPN-Service
+```
+
+训练过程中会自动创建以下目录结构：
+```
+log/
+└── 数据集名称/
+    ├── checkpoints/    # 模型检查点
+    └── tensorboard/    # 训练日志
+```
+
+## 4. 查看训练进度
+使用 TensorBoard 查看训练过程：
+
+方法1（推荐）：
+```bash
+python -m tensorboard.main --logdir=log/数据集名称/tensorboard
+```
+
+方法2：
+```bash
+tensorboard --logdir=log/数据集名称/tensorboard
+```
+
+然后在浏览器中访问：
+```
+http://localhost:6006
+```
+
+可以查看：
+- 训练损失（loss）
+- 分类损失（clf_loss）
+- 重构损失（rec_loss）
+- 学习率变化
+- 准确率、F1分数等指标
+- 模型结构图

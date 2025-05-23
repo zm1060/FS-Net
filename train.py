@@ -5,7 +5,6 @@ import json
 import model
 import os
 import functools
-
 from dataset import accuracy, get_dataset_from_generator
 import eval
 
